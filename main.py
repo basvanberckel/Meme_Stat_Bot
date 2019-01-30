@@ -70,10 +70,16 @@ if __name__ == '__main__':
     subreddit = reddit.subreddit('memeeconomy')
     now = int(datetime.datetime.timestamp(datetime.datetime.today()))
     balance = get_balance('bubulle099')
+    if not balance:
+        balance = data['balance']
     net_worth = get_net_worth('bubulle099')
+    if not net_worth:
+        net_worth= data['_Net_worth']
     print('balance: {}'.format(balance))
-    if balance >= 100:
+    if balance and balance >= 100:
+        invest = []
         for submission in subreddit.new(limit=50):
+            print(submission.title)
             date = submission.created_utc
             time_delta = (now - date)/60
             votes = submission.ups
@@ -81,27 +87,38 @@ if __name__ == '__main__':
                 if comment.author.name == 'MemeInvestor_bot':
                     invest_comment = comment
                     break
-            if invest_comment:
+            try :
+                invest_comment
+            except NameError:
+                print("     No bot answer")
+            else:
                 investments = get_investments(invest_comment)
                 ratio = investments/time_delta
                 invest_amount = math.ceil((balance/5) * ratio)
+                print('     ratio: {} \n     time:{}'.format(ratio, time_delta))
                 if invest_amount > balance or balance < 200 or invest_amount < net_worth/100:
                     invest_amount = balance
                 if invest_amount < 100:
                     invest_amount = 100
                 if time_delta > 10:
                     break
+
                 if submission.id not in data['invested'] and ratio >= 2 and votes < 10:
                     submission.downvote()
                     invest_comment.reply('!invest {}'.format(invest_amount))
-                    print('invested in {}'.format(submission.id))
+                    print('invested {}'.format(invest_amount))
                     data['invested'].append(submission.id)
                     balance -= invest_amount
+                    invest.append(submission)
                     with open('data.json', 'w') as outfile:
                         json.dump(data, outfile, indent=4, sort_keys=True)
         data['_Ranking'] = get_ranking('bubulle099')
         data['_Net_worth'] = net_worth
+        date = datetime.datetime.now()
+        data['_Last_Scan'] = str(date)
+
     upvote_invested_memes()
     data['balance'] = balance
+    print('invested in: {}'.format(invest))
     with open('data.json', 'w') as outfile:
         json.dump(data, outfile, indent=4, sort_keys=True)

@@ -1,2 +1,2 @@
-cd C:\Users\gbelanger2\PycharmProjects\memeEconomy
+cd /D "%~dp0"
 python main.py
