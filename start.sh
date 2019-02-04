@@ -1,3 +1,3 @@
-#!/usr/bin/env bash
-cd "$(dirname "$0")"
+#!/bin/bash
+cd /home/caribosaurus/Documents/ETS/MemeInvestorBot/
 venv/bin/python main.py

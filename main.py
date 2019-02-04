@@ -56,11 +56,12 @@ def get_investments(comment):
 def upvote_invested_memes():
     unread_messages = []
     for item in reddit.inbox.unread(limit=None):
-        if isinstance(item, Comment) and item.author.name  == 'MemeInvestor_bot':
+        if isinstance(item, Comment) and item.author.name == 'MemeInvestor_bot':
             item.submission.upvote()
             unread_messages.append(item)
             item.delete()
     reddit.inbox.mark_read(unread_messages)
+
 
 if __name__ == '__main__':
     # Create the Reddit instance
@@ -95,15 +96,14 @@ if __name__ == '__main__':
                 investments = get_investments(invest_comment)
                 ratio = investments/time_delta
                 invest_amount = math.ceil((balance/5) * ratio)
-                print('     ratio: {} \n     time:{}'.format(ratio, time_delta))
+                print('     updoots: {}\n     investements:{}\n     ratio: {} \n     time:{}'.format(submission.ups, investments, ratio, time_delta))
+                if time_delta > 10:
+                    break
                 if invest_amount > balance or balance < 200 or invest_amount < net_worth/100:
                     invest_amount = balance
                 if invest_amount < 100:
                     invest_amount = 100
-                if time_delta > 10:
-                    break
-
-                if submission.id not in data['invested'] and ratio >= 2 and votes < 10:
+                if submission.id not in data['invested'] and ratio >= 1.4 and votes < 10:
                     submission.downvote()
                     invest_comment.reply('!invest {}'.format(invest_amount))
                     print('invested {}'.format(invest_amount))
@@ -112,10 +112,9 @@ if __name__ == '__main__':
                     invest.append(submission)
                     with open('data.json', 'w') as outfile:
                         json.dump(data, outfile, indent=4, sort_keys=True)
-        data['_Ranking'] = get_ranking('bubulle099')
+        #data['_Ranking'] = get_ranking('bubulle099')
         data['_Net_worth'] = net_worth
-        date = datetime.datetime.now()
-        data['_Last_Scan'] = str(date)
+        data['_Last_Scan'] = str(datetime.datetime.now())
 
     upvote_invested_memes()
     data['balance'] = balance
