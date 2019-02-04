@@ -4,7 +4,6 @@ import requests
 import math
 import boto3
 from praw.models import Comment
-from botocore.exceptions import ClientError
 
 
 def get_account_info(account):
@@ -17,6 +16,7 @@ def get_account_info(account):
     else:
         return None
 
+
 def exists(id, table):
     try:
         response = table.get_item(Key={
@@ -26,6 +26,7 @@ def exists(id, table):
     except KeyError as e:
         item = None
     return item
+
 
 def get_ranking(account_name):
     return None
@@ -64,7 +65,6 @@ def get_net_worth(account):
         return info['networth']
     else:
         return 200000
-    return None
 
 
 def get_investments(comment):
@@ -83,17 +83,15 @@ def upvote_invested_memes(reddit):
             item.submission.upvote()
             unread_messages.append(item)
             item.delete()
-            reddit.inbox.mark_read(unread_messages)
-            return balance
+    reddit.inbox.mark_read(unread_messages)
 
 
 def lambda_handler(event, context):
-
     # Create the Reddit instance from praw.ini Memeeco profile
     reddit = praw.Reddit('memeEco')
     balance = get_balance('bubulle099',reddit)
     net_worth = get_net_worth('bubulle099')
-    retour = {'memes':[],'invested':[],'balance':balance}
+    retour = {'memes': [], 'invested': [], 'balance': balance}
     if balance and balance >= 100:
         invest = []
         dynamodb = boto3.resource('dynamodb',region_name='eu-west-1', endpoint_url="https://dynamodb.eu-west-1.amazonaws.com")
@@ -126,8 +124,7 @@ def lambda_handler(event, context):
                         invest_comment.reply('!invest {}'.format(invest_amount))
                         balance -= invest_amount
                         print('INVESTED')
-                        table.put_item(
-                            Item={"id": submission.id})
+                        table.put_item(Item={"id": submission.id})
                         retour['invested'].append(submission.id)
     upvote_invested_memes(reddit)
     return retour
