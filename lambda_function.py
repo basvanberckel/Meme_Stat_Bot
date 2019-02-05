@@ -52,10 +52,15 @@ def get_balance(account,reddit):
             if isinstance(item, Comment) and item.author.name == 'MemeInvestor_bot':
                 message = item.body.split('**', 1)[-1].split('Meme',1)[0]
                 balance = list(filter(str.isdigit, message))
-                balance_str=''
+                balance_str = ''
                 for i in range(len(balance)):
                     balance_str += str(balance[i])
-                return int(balance_str)
+                try:
+                    balance = int(balance_str)
+                    return balance
+                except ValueError:
+                    print('no balance')
+
     return None
 
 
@@ -64,7 +69,7 @@ def get_net_worth(account):
     if info:
         return info['networth']
     else:
-        return 200000
+        return 700000
 
 
 def get_investments(comment):
