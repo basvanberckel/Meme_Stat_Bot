@@ -70,7 +70,7 @@ def get_net_worth(account):
     if info:
         return info['networth']
     else:
-        return 1000000
+        return 2200000
 
 
 def get_investments(comment):
