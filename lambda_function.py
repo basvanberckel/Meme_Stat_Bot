@@ -127,7 +127,7 @@ def lambda_handler(event, context):
                 retour['memes'].append(meme)
                 if time_delta > 10:
                     break
-                if ratio >= 1.6 and investments > 2 and submission.ups < 10:
+                if ratio >= 2 and investments > 2 and submission.ups < 10:
                     item = exists(submission.id, table)
                     if item is None:
                         invest_amount = math.ceil((balance / 5) * ratio)
