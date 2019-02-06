@@ -43,14 +43,14 @@ def get_ranking(account_name):
         return None
 
 
-def get_balance(account,reddit):
+def get_balance(account, reddit):
     info = get_account_info(account)
     if info:
         return info['balance']
     else:
         for item in reddit.inbox.all(limit=None):
             if isinstance(item, Comment) and item.author.name == 'MemeInvestor_bot':
-                message = item.body.split('**', 1)[-1].split('Meme',1)[0]
+                message = item.body.split('**', 1)[-1].split('Meme', 1)[0]
                 balance = list(filter(str.isdigit, message))
                 balance_str = ''
                 for i in range(len(balance)):
@@ -69,7 +69,7 @@ def get_net_worth(account):
     if info:
         return info['networth']
     else:
-        return 700000
+        return 1000000
 
 
 def get_investments(comment):
@@ -94,12 +94,12 @@ def upvote_invested_memes(reddit):
 def lambda_handler(event, context):
     # Create the Reddit instance from praw.ini Memeeco profile
     reddit = praw.Reddit('memeEco')
-    balance = get_balance('bubulle099',reddit)
+    balance = get_balance('bubulle099', reddit)
     net_worth = get_net_worth('bubulle099')
     retour = {'memes': [], 'invested': [], 'balance': balance}
     if balance and balance >= 100:
-        invest = []
-        dynamodb = boto3.resource('dynamodb',region_name='eu-west-1', endpoint_url="https://dynamodb.eu-west-1.amazonaws.com")
+        dynamodb = boto3.resource('dynamodb', region_name='eu-west-1',
+                                  endpoint_url="https://dynamodb.eu-west-1.amazonaws.com")
         table = dynamodb.Table('investement')
         for submission in reddit.subreddit('memeeconomy').new(limit=15):
             time_delta = (int(datetime.datetime.timestamp(datetime.datetime.today())) - submission.created_utc) / 60
@@ -114,19 +114,22 @@ def lambda_handler(event, context):
             else:
                 investments = get_investments(invest_comment)
                 ratio = investments / time_delta
-                retour['memes'].append({'title':submission.title,'updoots':submission.ups,'ratio':ratio,'time':time_delta})
+                meme = {'title': submission.title, 'updoots': submission.ups, 'ratio': ratio, 'time': time_delta}
+                retour['memes'].append(meme)
                 if time_delta > 10:
                     break
                 if ratio >= 1.6 and investments > 2 and submission.ups < 10:
-                    item = exists(submission.id,table)
+                    item = exists(submission.id, table)
                     if item is None:
                         invest_amount = math.ceil((balance / 5) * ratio)
                         if invest_amount > balance or balance < 200 or invest_amount < net_worth / 100:
                             invest_amount = balance
                         if invest_amount < 100:
                             invest_amount = 100
+                        meme.update({'balancePercentage': str(invest_amount / balance * 100) + '%'})
                         submission.downvote()
-                        invest_comment.reply('!invest {}'.format(invest_amount))
+                        my_invest = invest_comment.reply('!invest {}'.format(invest_amount))
+                        my_invest.reply('Beep Beep Boop, Here are some stats:<Enter> {}'.format(meme))
                         balance -= invest_amount
                         print('INVESTED')
                         table.put_item(Item={"id": submission.id})
