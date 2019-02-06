@@ -133,6 +133,6 @@ def lambda_handler(event, context):
                         table.put_item(Item={"id": submission.id})
                         balance -= invest_amount
                         retour['invested'].append(submission.id)
-                        my_invest.reply('Beep Beep Boop, Here are some stats:  \n{}'.format(json.dumps(meme)))
+                        my_invest.reply('Beep Beep Boop, Here are some stats:  \n{}'.format(json.dumps(meme, indent=4)))
     upvote_invested_memes(reddit)
     return retour
