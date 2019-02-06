@@ -130,7 +130,7 @@ def lambda_handler(event, context):
                         meme.update({'balancePercentage': str(invest_amount / balance * 100) + '%'})
                         submission.downvote()
                         my_invest = invest_comment.reply('!invest {}'.format(invest_amount))
-                        my_invest.reply('Beep Beep Boop, Here are some stats:  \n{}'.format(json.dump(meme)))
+                        my_invest.reply('Beep Beep Boop, Here are some stats:  \n{}'.format(json.dumps(meme)))
                         balance -= invest_amount
                         print('INVESTED')
                         table.put_item(Item={"id": submission.id})
