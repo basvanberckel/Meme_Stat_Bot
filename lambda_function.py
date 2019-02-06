@@ -92,6 +92,13 @@ def upvote_invested_memes(reddit):
     reddit.inbox.mark_read(unread_messages)
 
 
+def pretty_print(meme):
+    formated_meme = ''
+    for key, value in meme.items():
+        formated_meme += '{}: {}  \n'.format(key, value)
+    return formated_meme
+
+
 def lambda_handler(event, context):
     # Create the Reddit instance from praw.ini Memeeco profile
     reddit = praw.Reddit('memeEco')
@@ -115,7 +122,8 @@ def lambda_handler(event, context):
             else:
                 investments = get_investments(invest_comment)
                 ratio = investments / time_delta
-                meme = {'title': submission.title, 'updoots': submission.ups, 'ratio': ratio, 'time': time_delta}
+                meme = {'title': submission.title, 'updoots': submission.ups, 'investements': investments,
+                        'time': time_delta, 'ratio': ratio, 'balance': balance}
                 retour['memes'].append(meme)
                 if time_delta > 10:
                     break
@@ -133,6 +141,7 @@ def lambda_handler(event, context):
                         table.put_item(Item={"id": submission.id})
                         balance -= invest_amount
                         retour['invested'].append(submission.id)
-                        my_invest.reply('Beep Beep Boop, Here are some stats:  \n{}'.format(json.dumps(meme, indent=4)))
+                        del meme['ratio']
+                        my_invest.reply('Beep Beep Boop, Here are some stats:  \n{}'.format(pretty_print(meme)))
     upvote_invested_memes(reddit)
     return retour
