@@ -124,7 +124,6 @@ def lambda_handler(event, context):
             ratio = investments / time_delta
             meme = {'title': submission.title, 'updoots': submission.ups, 'investements': investments,
                     'time': time_delta, 'ratio': ratio, 'balance': balance}
-            print(meme)
             retour['memes'].append(meme)
             if time_delta > 10:
                 break
