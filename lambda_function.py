@@ -115,6 +115,7 @@ def lambda_handler(event, context):
         for submission in reddit.subreddit('memeeconomy').new(limit=15):
             time_delta = (int(datetime.datetime.timestamp(datetime.datetime.today())) - submission.created_utc) / 60
             investments = 0
+            submission.comments.replace_more(limit=None)
             for comment in submission.comments:
                 if comment.author.name == 'MemeInvestor_bot':
                     invest_comment = comment
