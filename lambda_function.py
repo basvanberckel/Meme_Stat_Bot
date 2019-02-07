@@ -70,7 +70,7 @@ def get_net_worth(account):
     if info:
         return info['networth']
     else:
-        return 2200000
+        return 12000000
 
 
 def get_investments(comment):
@@ -79,6 +79,9 @@ def get_investments(comment):
     for reply in comment.replies:
         if '!invest' in reply.body:
             cnt += 1
+            for reply in reply.replies:
+                if reply.author.name == 'MemeInvestor_bot':
+                    cnt += get_investments(reply)
     return cnt
 
 
@@ -111,37 +114,34 @@ def lambda_handler(event, context):
         table = dynamodb.Table('investement')
         for submission in reddit.subreddit('memeeconomy').new(limit=15):
             time_delta = (int(datetime.datetime.timestamp(datetime.datetime.today())) - submission.created_utc) / 60
+            investments = 0
             for comment in submission.comments:
                 if comment.author.name == 'MemeInvestor_bot':
                     invest_comment = comment
+                    investments = get_investments(invest_comment)
                     break
-            try:
-                invest_comment
-            except NameError:
-                print("No bot answer")
-            else:
-                investments = get_investments(invest_comment)
-                ratio = investments / time_delta
-                meme = {'title': submission.title, 'updoots': submission.ups, 'investements': investments,
-                        'time': time_delta, 'ratio': ratio, 'balance': balance}
-                retour['memes'].append(meme)
-                if time_delta > 10:
-                    break
-                if ratio >= 2 and investments > 2 and submission.ups < 10:
-                    item = exists(submission.id, table)
-                    if item is None:
-                        invest_amount = math.ceil((balance / 5) * ratio)
-                        if invest_amount > balance or balance < 200 or invest_amount < net_worth / 100:
-                            invest_amount = balance
-                        if invest_amount < 100:
-                            invest_amount = 100
-                        meme.update({'balancePercentage': str(invest_amount / balance * 100) + '%'})
-                        submission.downvote()
-                        my_invest = invest_comment.reply('!invest {}'.format(invest_amount))
-                        table.put_item(Item={"id": submission.id})
-                        balance -= invest_amount
-                        retour['invested'].append(submission.id)
-                        del meme['ratio']
-                        my_invest.reply('Beep Beep Boop, Here are some stats:  \n{}'.format(pretty_print(meme)))
+            ratio = investments / time_delta
+            meme = {'title': submission.title, 'updoots': submission.ups, 'investements': investments,
+                    'time': time_delta, 'ratio': ratio, 'balance': balance}
+            print(meme)
+            retour['memes'].append(meme)
+            if time_delta > 10:
+                break
+            if ratio >= 2 and investments > 2 and submission.ups < 10:
+                item = exists(submission.id, table)
+                if item is None:
+                    invest_amount = math.ceil((balance / 5) * ratio)
+                    if invest_amount > balance or balance < 200 or invest_amount < net_worth / 100:
+                        invest_amount = balance
+                    if invest_amount < 100:
+                        invest_amount = 100
+                    meme.update({'balancePercentage': str(invest_amount / balance * 100) + '%'})
+                    submission.downvote()
+                    my_invest = invest_comment.reply('!invest {}'.format(invest_amount))
+                    table.put_item(Item={"id": submission.id})
+                    balance -= invest_amount
+                    retour['invested'].append(submission.id)
+                    del meme['ratio']
+                    my_invest.reply('Beep Beep Boop, Here are some stats:  \n{}'.format(pretty_print(meme)))
     upvote_invested_memes(reddit)
     return retour
