@@ -3,3 +3,4 @@ prawcore==1.0.0
 requests==2.19.1
 boto3
 python-lambda-local
+giphy_client

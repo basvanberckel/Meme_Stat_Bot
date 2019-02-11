@@ -4,6 +4,8 @@ import requests
 import math
 import boto3
 import json
+import giphy_client
+from giphy_client.rest import ApiException
 from praw.models import Comment
 
 
@@ -27,6 +29,20 @@ def exists(id, table):
     except KeyError as e:
         item = None
     return item
+
+
+def get_gif():
+    api_instance = giphy_client.DefaultApi()
+    api_key = 'crye2EEX88YGhcJkOOnx1TnVG0jBnreV'  # str | Giphy API Key.
+    tag = 'wolf-of-wall-street'  # str | Filters results by specified tag. (optional)
+    fmt = 'json'  # str | Used to indicate the expected response format. Default is Json. (optional) (default to json)
+
+    try:
+        # Random Endpoint
+        api_response = api_instance.gifs_random_get(api_key, tag=tag, fmt=fmt)
+        return api_response.data._image_url
+    except ApiException as e:
+        print("Exception when calling DefaultApi->gifs_random_get: %s\n" % e)
 
 
 def get_ranking(account_name):
@@ -70,7 +86,7 @@ def get_net_worth(account):
     if info:
         return info['networth']
     else:
-        return 12000000
+        return 2000000000
 
 
 def get_investments(comment):
@@ -142,6 +158,6 @@ def lambda_handler(event, context):
                     balance -= invest_amount
                     retour['invested'].append(submission.id)
                     del meme['ratio']
-                    my_invest.reply('Beep Beep Boop, Here are some stats:  \n{}'.format(pretty_print(meme)))
+                    my_invest.reply('[Beep Beep Boop]({}), Here are some stats:  \n{}'.format(get_gif(),pretty_print(meme)))
     upvote_invested_memes(reddit)
     return retour
