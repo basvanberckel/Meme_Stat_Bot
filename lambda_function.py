@@ -114,7 +114,10 @@ def upvote_invested_memes(reddit):
 def pretty_print(meme):
     formated_meme = ''
     for key, value in meme.items():
-        formated_meme += '{}: {}  \n'.format(key, value)
+        if key == 'time':
+            formated_meme += 'posted {} minute(s) ago  \n'.format(value)
+        else:
+            formated_meme += '{}: {}  \n'.format(key, value)
     return formated_meme
 
 
