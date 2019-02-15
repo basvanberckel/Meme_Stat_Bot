@@ -50,9 +50,9 @@ class Reddit:
             retour['memes'].append(meme)
             if time_delta > 10:
                 break
-            if ratio >= 2 and investments > 2 and submission.ups < 10:
-                item = self.already_invested(submission.id)
-                if item is None:
+            if ratio >= 2 and investments >= 2 and submission.ups < 10:
+                invested = self.already_invested(submission.id)
+                if not invested:
                     invest_amount = self.calculate_investement(ratio)
                     meme.update({'balancePercentage': str(invest_amount / self.account.balance * 100) + '%'})
                     submission.downvote()
