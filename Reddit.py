@@ -5,10 +5,13 @@ import boto3
 import giphy_client
 from giphy_client.rest import ApiException
 from Account import Account
+import os
 
 
 class Reddit:
-    reddit = praw.Reddit('memeEco')
+    reddit = praw.Reddit(client_id=os.environ['CLIENT_ID'],
+                         client_secret=os.environ['CLIENT_SECRET'], password=os.environ['REDDIT_PASSWORD'],
+                         user_agent=os.environ['USER_AGENT'], username=os.environ['REDDIT_USERNAME'])
     dynamodb = boto3.resource('dynamodb', region_name='eu-west-1',
                               endpoint_url="https://dynamodb.eu-west-1.amazonaws.com")
     my_investments = dynamodb.Table('investement')
