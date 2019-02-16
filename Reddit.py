@@ -5,6 +5,7 @@ import boto3
 import giphy_client
 from giphy_client.rest import ApiException
 from Account import Account
+from praw.models import Comment
 import os
 
 
@@ -107,3 +108,12 @@ class Reddit:
             return api_response.data._image_url
         except ApiException as e:
             print("Exception when calling DefaultApi->gifs_random_get: %s\n" % e)
+
+    def upvote_invested_memes(self):
+        unread_messages = []
+        for item in self.reddit.inbox.unread(limit=None):
+            if isinstance(item, Comment) and item.author.name == 'MemeInvestor_bot':
+                item.submission.upvote()
+                unread_messages.append(item)
+                item.delete()
+        self.reddit.inbox.mark_read(unread_messages)
