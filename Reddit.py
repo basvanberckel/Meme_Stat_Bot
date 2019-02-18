@@ -54,7 +54,7 @@ class Reddit:
             retour['memes'].append(meme)
             if time_delta > 10:
                 break
-            if ratio >= 2 and investments >= 2 and submission.ups < 10:
+            if ratio >= 2.2 and investments >= 3 and submission.ups < 10:
                 invested = self.already_invested(submission.id)
                 if not invested:
                     invest_amount = self.calculate_investement(ratio)
@@ -75,6 +75,8 @@ class Reddit:
             invest_amount = self.account.balance
         if invest_amount < 100:
             invest_amount = 100
+        #ALL IN NIBBA
+        invest_amount = self.account.balance
         return invest_amount
 
     def pretty_print(self, meme):
