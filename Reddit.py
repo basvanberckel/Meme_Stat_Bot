@@ -39,34 +39,35 @@ class Reddit:
 
     def scan(self):
         retour = {'memes': [], 'invested': [], 'balance': self.account.balance}
-        for submission in self.reddit.subreddit('memeeconomy').new(limit=15):
-            time_delta = (int(datetime.datetime.timestamp(datetime.datetime.today())) - submission.created_utc) / 60
-            investments = 0
-            submission.comments.replace_more(limit=None)
-            for comment in submission.comments:
-                if comment.author.name == 'MemeInvestor_bot':
-                    invest_comment = comment
-                    investments = self.get_investments(invest_comment)
+        if self.account.balance > 100:
+            for submission in self.reddit.subreddit('memeeconomy').new(limit=15):
+                time_delta = (int(datetime.datetime.timestamp(datetime.datetime.today())) - submission.created_utc) / 60
+                investments = 0
+                submission.comments.replace_more(limit=None)
+                for comment in submission.comments:
+                    if comment.author.name == 'MemeInvestor_bot':
+                        invest_comment = comment
+                        investments = self.get_investments(invest_comment)
+                        break
+                ratio = investments / time_delta
+                meme = {'title': submission.title, 'updoots': submission.ups, 'investements': investments,
+                        'time': time_delta, 'ratio': ratio, 'balance': self.account.balance}
+                retour['memes'].append(meme)
+                if time_delta > 10:
                     break
-            ratio = investments / time_delta
-            meme = {'title': submission.title, 'updoots': submission.ups, 'investements': investments,
-                    'time': time_delta, 'ratio': ratio, 'balance': self.account.balance}
-            retour['memes'].append(meme)
-            if time_delta > 10:
-                break
-            if ratio >= 2.2 and investments >= 3 and submission.ups < 10:
-                invested = self.already_invested(submission.id)
-                if not invested:
-                    invest_amount = self.calculate_investement(ratio)
-                    meme.update({'balancePercentage': str(invest_amount / self.account.balance * 100) + '%'})
-                    submission.downvote()
-                    invest_comment.reply('!invest {}'.format(invest_amount))
-                    self.my_investments.put_item(Item={"id": submission.id})
-                    self.account.balance -= invest_amount
-                    retour['invested'].append(submission.id)
-                    del meme['ratio']
-                    submission.reply(
-                        '[Beep Beep Boop]({}), Here are some stats:  \n{}'.format(self.get_gif(), self.pretty_print(meme)))
+                if ratio >= 2.2 and investments >= 3 and submission.ups < 10:
+                    invested = self.already_invested(submission.id)
+                    if not invested:
+                        invest_amount = self.calculate_investement(ratio)
+                        meme.update({'balancePercentage': str(invest_amount / self.account.balance * 100) + '%'})
+                        submission.downvote()
+                        invest_comment.reply('!invest {}'.format(invest_amount))
+                        self.my_investments.put_item(Item={"id": submission.id})
+                        self.account.balance -= invest_amount
+                        retour['invested'].append(submission.id)
+                        del meme['ratio']
+                        submission.reply(
+                            '[Beep Beep Boop]({}), Here are some stats:  \n{}'.format(self.get_gif(), self.pretty_print(meme)))
         return retour
 
     def calculate_investement(self, ratio):
