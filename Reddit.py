@@ -115,7 +115,7 @@ class Reddit:
     def upvote_invested_memes(self):
         unread_messages = []
         for item in self.reddit.inbox.unread(limit=None):
-            if isinstance(item, Comment) and item.author.name == 'MemeInvestor_bot':
+            if isinstance(item, Comment) and item.author.name == 'MemeInvestor_bot' and 'invested' in item.body:
                 item.submission.upvote()
                 unread_messages.append(item)
                 item.delete()
