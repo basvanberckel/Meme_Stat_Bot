@@ -44,6 +44,7 @@ class Reddit:
         if self.account.balance > 100 or self.collect_data:
             for submission in self.reddit.subreddit('memeeconomy').new(limit=15):
                 time_delta = (int(datetime.datetime.timestamp(datetime.datetime.today())) - submission.created_utc) / 60
+                posted_at = datetime.datetime.fromtimestamp(submission.created_utc).strftime('%H:%M:%S')
                 if time_delta > 10:
                     break
                 investments = 0
@@ -55,7 +56,7 @@ class Reddit:
                         break
                 ratio = investments / time_delta
                 meme = {'id':str(submission.id), 'title': submission.title, 'updoots': submission.ups, 'investements': investments,
-                        'time': str(time_delta), 'ratio': str(ratio), 'flair': str(submission.author_flair_text),}
+                        'time': posted_at, 'ratio': str(ratio), 'flair': str(submission.author_flair_text),}
                 if self.collect_data and 3 <= time_delta < 4:
                     self.data.put_item(Item=meme)
                 retour['memes'].append(meme)
