@@ -57,7 +57,7 @@ class Reddit:
                 ratio = investments / time_delta
                 meme = {'id': str(submission.id), 'title': submission.title, 'updoots': submission.ups,
                         'investements': investments,
-                        'time': posted_at, 'time_stamp': submission.created_utc, 'ratio': str(ratio),
+                        'time': posted_at, 'time_stamp': str(submission.created_utc), 'ratio': str(ratio),
                         'flair': str(submission.author_flair_text), }
                 if self.collect_data and 3 <= time_delta < 4:
                     self.data.put_item(Item=meme)
