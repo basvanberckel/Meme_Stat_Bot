@@ -7,7 +7,7 @@ from giphy_client.rest import ApiException
 from Account import Account
 from praw.models import Comment
 import os
-
+from decimal import Decimal
 
 class Reddit:
     reddit = praw.Reddit(client_id=os.environ['CLIENT_ID'],
@@ -16,6 +16,8 @@ class Reddit:
     dynamodb = boto3.resource('dynamodb', region_name='eu-west-1',
                               endpoint_url="https://dynamodb.eu-west-1.amazonaws.com")
     my_investments = dynamodb.Table('investement')
+    data = dynamodb.Table('meme_data')
+    collect_data = True
 
     def __init__(self):
         self.account = Account('bubulle099', self)
@@ -39,7 +41,7 @@ class Reddit:
 
     def scan(self):
         retour = {'memes': [], 'invested': [], 'balance': self.account.balance}
-        if self.account.balance > 100:
+        if self.account.balance > 100 or self.collect_data:
             for submission in self.reddit.subreddit('memeeconomy').new(limit=15):
                 time_delta = (int(datetime.datetime.timestamp(datetime.datetime.today())) - submission.created_utc) / 60
                 investments = 0
@@ -51,7 +53,9 @@ class Reddit:
                         break
                 ratio = investments / time_delta
                 meme = {'title': submission.title, 'updoots': submission.ups, 'investements': investments,
-                        'time': time_delta, 'ratio': ratio, 'balance': self.account.balance}
+                        'time': str(time_delta), 'ratio': str(ratio), 'flair': str(submission.author_flair_text), 'id':submission.id}
+                if self.collect_data:
+                    self.data.put_item(Item=meme)
                 retour['memes'].append(meme)
                 if time_delta > 10:
                     break
@@ -66,6 +70,7 @@ class Reddit:
                         self.account.balance -= invest_amount
                         retour['invested'].append(submission.id)
                         del meme['ratio']
+                        del meme['id']
                         submission.reply(
                             '[Beep Beep Boop]({}), Here are some stats:  \n{}'.format(self.get_gif(), self.pretty_print(meme)))
         return retour
