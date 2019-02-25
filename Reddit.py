@@ -94,9 +94,6 @@ class Reddit:
     def pretty_print(self, meme):
         formated_meme = ''
         for key, value in meme.items():
-            if key == 'time':
-                formated_meme += 'posted {} minute(s) ago  \n'.format(value)
-            else:
                 formated_meme += '{}: {}  \n'.format(key, value)
         return formated_meme
 
