@@ -7,7 +7,8 @@ from giphy_client.rest import ApiException
 from Account import Account
 from praw.models import Comment
 import os
-from decimal import Decimal
+import uuid
+
 
 class Reddit:
     reddit = praw.Reddit(client_id=os.environ['CLIENT_ID'],
@@ -43,6 +44,8 @@ class Reddit:
         retour = {'memes': [], 'invested': [], 'balance': self.account.balance}
         if self.account.balance > 100 or self.collect_data:
             for submission in self.reddit.subreddit('memeeconomy').new(limit=15):
+                if time_delta > 10:
+                    break
                 time_delta = (int(datetime.datetime.timestamp(datetime.datetime.today())) - submission.created_utc) / 60
                 investments = 0
                 submission.comments.replace_more(limit=None)
@@ -52,13 +55,12 @@ class Reddit:
                         investments = self.get_investments(invest_comment)
                         break
                 ratio = investments / time_delta
-                meme = {'title': submission.title, 'updoots': submission.ups, 'investements': investments,
-                        'time': str(time_delta), 'ratio': str(ratio), 'flair': str(submission.author_flair_text), 'id':submission.id}
-                if self.collect_data:
+                meme = {'id':str(uuid.uuid1()), 'title': submission.title, 'updoots': submission.ups, 'investements': investments,
+                        'time': str(time_delta), 'ratio': str(ratio), 'flair': str(submission.author_flair_text), 'reddit_id':submission.id}
+                if self.collect_data and 3 <= time_delta < 4:
                     self.data.put_item(Item=meme)
                 retour['memes'].append(meme)
-                if time_delta > 10:
-                    break
+
                 if ratio >= 2 and investments >= 2 and submission.ups < 10 and self.account.balance > 100:
                     invested = self.already_invested(submission.id)
                     if not invested :
@@ -70,6 +72,7 @@ class Reddit:
                         self.account.balance -= invest_amount
                         retour['invested'].append(submission.id)
                         del meme['ratio']
+                        del meme['reddit_id']
                         del meme['id']
                         submission.reply(
                             '[Beep Beep Boop]({}), Here are some stats:  \n{}'.format(self.get_gif(), self.pretty_print(meme)))
