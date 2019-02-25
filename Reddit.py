@@ -55,15 +55,17 @@ class Reddit:
                         investments = self.get_investments(invest_comment)
                         break
                 ratio = investments / time_delta
-                meme = {'id':str(submission.id), 'title': submission.title, 'updoots': submission.ups, 'investements': investments,
-                        'time': posted_at, 'ratio': str(ratio), 'flair': str(submission.author_flair_text),}
+                meme = {'id': str(submission.id), 'title': submission.title, 'updoots': submission.ups,
+                        'investements': investments,
+                        'time': posted_at, 'time_stamp': submission.created_utc, 'ratio': str(ratio),
+                        'flair': str(submission.author_flair_text), }
                 if self.collect_data and 3 <= time_delta < 4:
                     self.data.put_item(Item=meme)
                 retour['memes'].append(meme)
 
                 if ratio >= 2 and investments >= 2 and submission.ups < 10 and self.account.balance > 100:
                     invested = self.already_invested(submission.id)
-                    if not invested :
+                    if not invested:
                         invest_amount = self.calculate_investement(ratio)
                         meme.update({'balancePercentage': str(invest_amount / self.account.balance * 100) + '%'})
                         submission.downvote()
@@ -73,8 +75,10 @@ class Reddit:
                         retour['invested'].append(submission.id)
                         del meme['ratio']
                         del meme['id']
+                        del meme['time_stamp']
                         submission.reply(
-                            '[Beep Beep Boop]({}), Here are some stats:  \n{}'.format(self.get_gif(), self.pretty_print(meme)))
+                            '[Beep Beep Boop]({}), Here are some stats:  \n{}'.format(self.get_gif(),
+                                                                                      self.pretty_print(meme)))
         return retour
 
     def calculate_investement(self, ratio):
@@ -83,7 +87,7 @@ class Reddit:
             invest_amount = self.account.balance
         if invest_amount < 100:
             invest_amount = 100
-        #ALL IN NIBBA
+        # ALL IN NIBBA
         invest_amount = self.account.balance
         return invest_amount
 
