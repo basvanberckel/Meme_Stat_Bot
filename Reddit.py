@@ -58,7 +58,7 @@ class Reddit:
                 meme = {'id': str(submission.id), 'title': submission.title, 'updoots': submission.ups,
                         'investements': investments,
                         'time': posted_at, 'time_stamp': str(submission.created_utc), 'ratio': str(ratio),
-                        'flair': str(submission.author_flair_text), }
+                        'flair': str(submission.author_flair_text), 'upvotes': None}
                 if self.collect_data and 3 <= time_delta < 4:
                     self.data.put_item(Item=meme)
                 retour['memes'].append(meme)
@@ -76,6 +76,7 @@ class Reddit:
                         del meme['ratio']
                         del meme['id']
                         del meme['time_stamp']
+                        del meme['upvotes']
                         submission.reply(
                             '[Beep Beep Boop]({}), Here are some stats:  \n{}'.format(self.get_gif(),
                                                                                       self.pretty_print(meme)))
@@ -94,7 +95,7 @@ class Reddit:
     def pretty_print(self, meme):
         formated_meme = ''
         for key, value in meme.items():
-                formated_meme += '{}: {}  \n'.format(key, value)
+            formated_meme += '{}: {}  \n'.format(key, value)
         return formated_meme
 
     def already_invested(self, sub_id):
