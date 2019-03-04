@@ -18,6 +18,7 @@ class Reddit:
     my_investments = dynamodb.Table('investement')
     data = dynamodb.Table('meme_data')
     collect_data = True
+    send_info = True
 
     def __init__(self):
         self.account = Account('bubulle099', self)
@@ -77,7 +78,8 @@ class Reddit:
                         del meme['id']
                         del meme['time_stamp']
                         del meme['upvotes']
-                        submission.reply(
+                        if self.send_info:
+                            submission.reply(
                             '[Beep Beep Boop]({}), Here are some stats:  \n{}  \n{}'.format(self.get_gif(),
                                                                                             self.pretty_print(meme),
                                                                                             "If you run a bot and you're interested in joining a firm, message me!"))
