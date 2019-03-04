@@ -78,8 +78,9 @@ class Reddit:
                         del meme['time_stamp']
                         del meme['upvotes']
                         submission.reply(
-                            '[Beep Beep Boop]({}), Here are some stats:  \n{}'.format(self.get_gif(),
-                                                                                      self.pretty_print(meme)))
+                            '[Beep Beep Boop]({}), Here are some stats:  \n{}  \n{}'.format(self.get_gif(),
+                                                                                            self.pretty_print(meme),
+                                                                                            "If you run a bot and you're interested in joining a firm, message me!"))
         return retour
 
     def calculate_investement(self, ratio):
