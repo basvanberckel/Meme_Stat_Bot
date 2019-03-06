@@ -7,18 +7,22 @@ from giphy_client.rest import ApiException
 from Account import Account
 from praw.models import Comment
 import os
+from MemeData import MemeData
+from Stats import Stats
 
 
 class Reddit:
     reddit = praw.Reddit(client_id=os.environ['CLIENT_ID'],
                          client_secret=os.environ['CLIENT_SECRET'], password=os.environ['REDDIT_PASSWORD'],
                          user_agent=os.environ['USER_AGENT'], username=os.environ['REDDIT_USERNAME'])
+
     dynamodb = boto3.resource('dynamodb', region_name='eu-west-1',
                               endpoint_url="https://dynamodb.eu-west-1.amazonaws.com")
     my_investments = dynamodb.Table('investement')
-    data = dynamodb.Table('meme_data')
+    data = MemeData()
     collect_data = True
-    send_info = True
+    send_info = False
+    stats = Stats()
 
     def __init__(self):
         self.account = Account('bubulle099', self)
@@ -61,7 +65,8 @@ class Reddit:
                         'time': posted_at, 'time_stamp': str(submission.created_utc), 'ratio': str(ratio),
                         'flair': str(submission.author_flair_text), 'upvotes': None}
                 if self.collect_data and 3 <= time_delta < 4:
-                    self.data.put_item(Item=meme)
+                    self.stats.post_stats(meme)
+                    self.data.add(meme)
                 retour['memes'].append(meme)
 
                 if ratio >= 2 and investments >= 2 and submission.ups < 10 and self.account.balance > 100:
@@ -80,9 +85,9 @@ class Reddit:
                         del meme['upvotes']
                         if self.send_info:
                             submission.reply(
-                            '[Beep Beep Boop]({}), Here are some stats:  \n{}  \n{}'.format(self.get_gif(),
-                                                                                            self.pretty_print(meme),
-                                                                                            "If you run a bot and you're interested in joining a firm, message me!"))
+                                '[Beep Beep Boop]({}), Here are some stats:  \n{}  \n{}'.format(self.get_gif(),
+                                                                                                self.pretty_print(meme),
+                                                                                                "If you run a bot and you're interested in joining a firm, message me!"))
         return retour
 
     def calculate_investement(self, ratio):
