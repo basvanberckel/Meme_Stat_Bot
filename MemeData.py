@@ -22,3 +22,7 @@ class MemeData:
                    'broke even':self.data.scan(FilterExpression=feProfit)['Items'],
                    'big profit':self.data.scan(FilterExpression=feBigProfit)['Items']}
         return response
+
+    def get_data(self):
+        fe =  Key('upvotes').gte(0) & Key('factor').gte(0)
+        return self.data.scan(FilterExpression=fe)['Items']
