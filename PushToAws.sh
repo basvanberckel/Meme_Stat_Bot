@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 cp *.py Lambda_package
+cp model.joblib Lambda_package
 pip install  -r requirements.txt -t Lambda_package -q
 cd Lambda_package
 zip -uq -r9 ~/package.zip .

@@ -11,11 +11,13 @@ class Stats:
 
     def post_stats(self, meme):
         submission = self.reddit.submission(meme['id'])
-        prediction = self.ai.predict(meme)[0]
-        reply = "I'm testing a new machine learning feature!  \n"
-        if prediction[0] >= prediction[1]  and prediction[0] >= prediction[2]:
-                reply += "I'm {} sure this post will not make a profit".format(str(round(prediction[0] * 100, 1)) + '%')
-        elif prediction[1] >= prediction[0] and prediction[1] >= prediction[2]:
-            reply += "I'm {} sure this post will make some profit".format(str(round(prediction[0] * 100, 1)) + '%')
+        prediction = self.ai.predict(meme)[0].tolist()
+        max_value = prediction.index(max(prediction))
+        reply = "I'm testing a new machine learning feature!  \n I'm {} sure this post will ".format(str(round(prediction[max_value] * 100, 1)) + '%')
+        if max is 0:
+                reply += 'not make a profit'
+        elif max is 1:
+            reply += "make some profit"
         else:
-            reply += "I'm {} sure this post will make a big profit".format(str(round(prediction[0] * 100, 1)) + '%')
+            reply += "make huge profit"
+        submission.reply(reply)

@@ -64,7 +64,6 @@ class Reddit:
                         'investements': investments,
                         'time': posted_at, 'time_stamp': str(submission.created_utc), 'ratio': str(ratio),
                         'flair': str(submission.author_flair_text), 'upvotes': None}
-
                 if self.collect_data and 3 <= time_delta < 4:
                     self.stats.post_stats(meme)
                     self.data.add(meme)
