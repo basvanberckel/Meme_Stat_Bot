@@ -1,5 +1,6 @@
 import csv
 from sklearn.neural_network import MLPClassifier
+from sklearn.model_selection import train_test_split
 from MemeData import MemeData
 from numpy import genfromtxt
 from joblib import dump, load
@@ -10,7 +11,7 @@ import copy
 class AI:
 
     def __init__(self):
-        self.train_model()
+        #self.train_model()
         self.clf = load('model.joblib')
 
     def train_model(self):
@@ -20,10 +21,9 @@ class AI:
         self.write_dict_to_csv('data.csv', data)
         my_data = genfromtxt('data.csv', delimiter=',')
         clf = MLPClassifier(solver='lbfgs', alpha=1e-5, max_iter=1000)
-        clf.fit(my_data, labels)
-        # accuracy = self.get_accuracy(clf, my_data, labels)
-        # return str(accuracy*100) + '%'
-        print(clf.score(my_data, labels))
+        X_train, X_test, y_train, y_test = train_test_split(my_data, labels, test_size=0.33, random_state=42)
+        clf.fit(X_train, y_train)
+        print(clf.score(X_test, y_test))
         dump(clf, 'model.joblib')
         return clf
 
@@ -40,10 +40,10 @@ class AI:
         row.pop('flair', None)
         row.pop('upvotes', None)
         row.pop('time_stamp', None)
-        row.pop('investements',None)
+        row.pop('investements', None)
         ftr = [3600, 60, 1]
 
-        row['time'] = sum([a * b for a, b in zip(ftr, map(int, row['time'].split(':')))])/(60*60)
+        row['time'] = sum([a * b for a, b in zip(ftr, map(int, row['time'].split(':')))]) / (60 * 60)
         row.pop('id', None)
         row.pop('title', None)
         return row
