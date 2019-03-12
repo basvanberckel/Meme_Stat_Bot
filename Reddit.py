@@ -2,8 +2,6 @@ import praw
 import datetime
 import math
 import boto3
-import giphy_client
-from giphy_client.rest import ApiException
 from Account import Account
 from praw.models import Comment
 import os
@@ -64,6 +62,7 @@ class Reddit:
                         'investements': investments,
                         'time': posted_at, 'time_stamp': str(submission.created_utc), 'ratio': str(ratio),
                         'flair': str(submission.author_flair_text), 'upvotes': None}
+
                 if self.collect_data and 3 <= time_delta < 4:
                     self.stats.post_stats(meme)
                     self.data.add(meme)
@@ -83,11 +82,6 @@ class Reddit:
                         del meme['id']
                         del meme['time_stamp']
                         del meme['upvotes']
-                        if self.send_info:
-                            submission.reply(
-                                '[Beep Beep Boop]({}), Here are some stats:  \n{}  \n{}'.format(self.get_gif(),
-                                                                                                self.pretty_print(meme),
-                                                                                                "If you run a bot and you're interested in joining a firm, message me!"))
         return retour
 
     def calculate_investement(self, ratio):
@@ -115,19 +109,6 @@ class Reddit:
         except KeyError as e:
             item = None
         return item is not None
-
-    def get_gif(self):
-        api_instance = giphy_client.DefaultApi()
-        api_key = 'crye2EEX88YGhcJkOOnx1TnVG0jBnreV'  # str | Giphy API Key.
-        tag = 'wolf-of-wall-street'  # str | Filters results by specified tag. (optional)
-        fmt = 'json'  # str | Used to indicate the expected response format. Default is Json. (optional) (default to json)
-
-        try:
-            # Random Endpoint
-            api_response = api_instance.gifs_random_get(api_key, tag=tag, fmt=fmt)
-            return api_response.data._image_url
-        except ApiException as e:
-            print("Exception when calling DefaultApi->gifs_random_get: %s\n" % e)
 
     def upvote_invested_memes(self):
         unread_messages = []
