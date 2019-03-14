@@ -1,9 +1,6 @@
 import praw
 import datetime
-import math
 import boto3
-from Account import Account
-from praw.models import Comment
 import os
 from MemeData import MemeData
 from Stats import Stats
@@ -22,9 +19,6 @@ class Reddit:
     send_info = False
     stats = Stats()
 
-    def __init__(self):
-        self.account = Account('bubulle099', self)
-
     def get_investments(self, comment):
         cnt = 0
         comment.replies.replace_more(limit=100)
@@ -36,85 +30,29 @@ class Reddit:
                         cnt += self.get_investments(reply)
         return cnt
 
-    def get_inbox(self):
-        return self.reddit.inbox.all(limit=None)
-
-    def get_unread(self):
-        return self.reddit.inbox.unread(limit=None)
-
     def scan(self):
-        retour = {'memes': [], 'invested': [], 'balance': self.account.balance}
-        if self.account.balance > 100 or self.collect_data:
-            for submission in self.reddit.subreddit('memeeconomy').new(limit=15):
-                time_delta = (int(datetime.datetime.timestamp(datetime.datetime.today())) - submission.created_utc) / 60
-                posted_at = datetime.datetime.fromtimestamp(submission.created_utc).strftime('%H:%M:%S')
-                if time_delta > 10:
+        retour = []
+        for submission in self.reddit.subreddit('memeeconomy').new(limit=15):
+            time_delta = (int(datetime.datetime.timestamp(datetime.datetime.today())) - submission.created_utc) / 60
+            posted_at = datetime.datetime.fromtimestamp(submission.created_utc).strftime('%H:%M:%S')
+            if time_delta > 10:
+                break
+            investments = 0
+            submission.comments.replace_more(limit=None)
+            for comment in submission.comments:
+                if comment.author.name == 'MemeInvestor_bot':
+                    invest_comment = comment
+                    investments = self.get_investments(invest_comment)
                     break
-                investments = 0
-                submission.comments.replace_more(limit=None)
-                for comment in submission.comments:
-                    if comment.author.name == 'MemeInvestor_bot':
-                        invest_comment = comment
-                        investments = self.get_investments(invest_comment)
-                        break
-                ratio = investments / time_delta
-                meme = {'id': str(submission.id), 'title': submission.title, 'updoots': submission.ups,
-                        'investements': investments,
-                        'time': posted_at, 'time_stamp': str(submission.created_utc), 'ratio': str(ratio),
-                        'flair': str(submission.author_flair_text), 'upvotes': None}
+            ratio = investments / time_delta
+            meme = {'id': str(submission.id), 'title': submission.title, 'updoots': submission.ups,
+                    'investements': investments,
+                    'time': posted_at, 'time_stamp': str(submission.created_utc), 'ratio': str(ratio),
+                    'flair': str(submission.author_flair_text), 'upvotes': None}
 
-                if self.collect_data and 3 <= time_delta < 4:
-                    self.stats.post_stats(meme)
-                    self.data.add(meme)
-                retour['memes'].append(meme)
+            if self.collect_data and 3 <= time_delta < 4:
+                self.stats.post_stats(meme)
+                self.data.add(meme)
+            retour.append(meme)
 
-                if ratio >= 2 and investments >= 2 and submission.ups < 10 and self.account.balance > 100:
-                    invested = self.already_invested(submission.id)
-                    if not invested:
-                        invest_amount = self.calculate_investement(ratio)
-                        meme.update({'balancePercentage': str(invest_amount / self.account.balance * 100) + '%'})
-                        submission.downvote()
-                        invest_comment.reply('!invest {}'.format(invest_amount))
-                        self.my_investments.put_item(Item={"id": submission.id})
-                        self.account.balance -= invest_amount
-                        retour['invested'].append(submission.id)
-                        del meme['ratio']
-                        del meme['id']
-                        del meme['time_stamp']
-                        del meme['upvotes']
         return retour
-
-    def calculate_investement(self, ratio):
-        invest_amount = math.ceil((self.account.balance / 5) * ratio)
-        if invest_amount > self.account.balance or self.account.balance < 200 or invest_amount < self.account.net_worth / 100:
-            invest_amount = self.account.balance
-        if invest_amount < 100:
-            invest_amount = 100
-        # ALL IN NIBBA
-        invest_amount = self.account.balance
-        return invest_amount
-
-    def pretty_print(self, meme):
-        formated_meme = ''
-        for key, value in meme.items():
-            formated_meme += '{}: {}  \n'.format(key, value)
-        return formated_meme
-
-    def already_invested(self, sub_id):
-        try:
-            response = self.my_investments.get_item(Key={
-                'id': sub_id
-            })
-            item = response['Item']
-        except KeyError as e:
-            item = None
-        return item is not None
-
-    def upvote_invested_memes(self):
-        unread_messages = []
-        for item in self.reddit.inbox.unread(limit=None):
-            if isinstance(item, Comment) and item.author.name == 'MemeInvestor_bot' and 'invested' in item.body:
-                item.submission.upvote()
-                unread_messages.append(item)
-                item.delete()
-        self.reddit.inbox.mark_read(unread_messages)

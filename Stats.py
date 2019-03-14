@@ -24,7 +24,7 @@ class Stats:
                 reply += 'not make profit'
         elif max_value == 1:
             reply+= "make profit"
-        submission.reply(reply)
+        #submission.reply(reply)
 
     def extract_primitive_meme(self, row):
         row.pop('flair', None)

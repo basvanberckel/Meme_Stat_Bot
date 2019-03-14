@@ -4,7 +4,6 @@ from Reddit import Reddit
 def lambda_handler(event, context):
 
     red = Reddit()
-    red.upvote_invested_memes()
     return red.scan()
 
 
