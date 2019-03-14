@@ -17,7 +17,7 @@ class Reddit:
     data = MemeData()
     collect_data = True
     send_info = False
-    stats = Stats()
+    stats = Stats(reddit)
 
     def get_investments(self, comment):
         cnt = 0
@@ -35,7 +35,7 @@ class Reddit:
         for submission in self.reddit.subreddit('memeeconomy').new(limit=15):
             time_delta = (int(datetime.datetime.timestamp(datetime.datetime.today())) - submission.created_utc) / 60
             posted_at = datetime.datetime.fromtimestamp(submission.created_utc).strftime('%H:%M:%S')
-            if time_delta > 10:
+            if time_delta > 4:
                 break
             investments = 0
             submission.comments.replace_more(limit=None)
