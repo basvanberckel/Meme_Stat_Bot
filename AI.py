@@ -17,18 +17,18 @@ class AI:
 
     def train_model(self):
         meme_data = MemeData()
-        self.extract_primitive_list(meme_data.get_data())
+        #self.extract_primitive_list(meme_data.get_data())
         my_data = pd.read_csv('data.csv')
-        bins = (0, 1, 3)
-        group_names = ['bad', 'good']
-        my_data['factor'] = pd.cut(my_data['factor'], bins=bins, labels=group_names)
-        print(my_data['factor'].unique())
+        bins = (-10, 25, 100,1000,10000,100000)
+        group_names = ['bad', 'ok','good','awesome','top']
+        my_data['upvotes'] = pd.cut(my_data['upvotes'], bins=bins, labels=group_names,include_lowest=True)
+        print(my_data['upvotes'].unique())
         label_factor = LabelEncoder()
-        my_data['factor'] = label_factor.fit_transform(my_data['factor'])
-        X = my_data.drop('factor', axis=1)
-        y = my_data['factor']
+        my_data['upvotes'] = label_factor.fit_transform(my_data['upvotes'])
+        X = my_data.drop('upvotes', axis=1)
+        y = my_data['upvotes']
         clf = MLPClassifier(solver='adam', alpha=1e-500, max_iter=1000, hidden_layer_sizes=(11, 11, 11))
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.20, random_state=42)
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.30, random_state=42)
         clf.fit(X_train, y_train)
         preds = clf.predict(X_test)
         print(classification_report(y_test, preds))
@@ -50,12 +50,12 @@ class AI:
 
     def extract_primitive_meme(self, row):
         row.pop('flair', None)
-        row.pop('upvotes', None)
+        row.pop('factor', None)
         row.pop('time_stamp', None)
         row.pop('ratio', None)
         ftr = [3600, 60, 1]
         row['time'] = sum([a * b for a, b in zip(ftr, map(int, row['time'].split(':')))]) / (60 * 60)
-        row.pop('time', None)
+        #row.pop('time', None)
         row.pop('id', None)
         row.pop('title', None)
         return row
