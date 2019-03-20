@@ -17,7 +17,7 @@ class Stats:
             idx = len(prediction)-1 - index
             score += prediction[idx]
             if score > 0.5 and idx > 0:
-                reply = "Beep Beep Boop  \nI'm {} sure this post will get atleast {} upvotes".format(
+                reply = "Beep Beep Boop  \nI'm {} sure this post will get at least {} upvotes".format(
                     str(round(score * 100, 1)) + '%', self.bins[idx])
                 self.reddit.submission(meme['id']).reply(reply)
                 return prediction
