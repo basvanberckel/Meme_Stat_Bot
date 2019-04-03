@@ -11,7 +11,7 @@ class Stats:
         similar = self.data.get_similar(meme)
         size = len(similar['loss']) + len(similar['broke even'])
         if size > 0:
-            reply = 'Found {} similar memes  \n {}% turned into a loss  \n {}% of them at least broke even  \n {}% made good profit'.format(
+            reply = 'Found {} similar submissions  \n {}% turned into a loss  \n {}% of them at least broke even  \n {}% made good profit'.format(
                 size,
                 round(len(similar['loss']) / size * 100, 1),
                 round(len(similar['broke even']) / size * 100, 1),
