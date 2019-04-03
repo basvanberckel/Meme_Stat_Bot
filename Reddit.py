@@ -10,13 +10,8 @@ class Reddit:
     reddit = praw.Reddit(client_id=os.environ['CLIENT_ID'],
                          client_secret=os.environ['CLIENT_SECRET'], password=os.environ['REDDIT_PASSWORD'],
                          user_agent=os.environ['USER_AGENT'], username=os.environ['REDDIT_USERNAME'])
-
-    dynamodb = boto3.resource('dynamodb', region_name='eu-west-1',
-                              endpoint_url="https://dynamodb.eu-west-1.amazonaws.com")
-    my_investments = dynamodb.Table('investement')
     data = MemeData()
     collect_data = True
-    send_info = False
     stats = Stats(reddit)
 
     def get_investments(self, comment):
@@ -56,6 +51,3 @@ class Reddit:
             retour.append(meme)
 
         return retour
-
-    def get_flair_id(self,flair):
-        return 0
