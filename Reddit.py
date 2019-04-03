@@ -56,3 +56,6 @@ class Reddit:
             retour.append(meme)
 
         return retour
+
+    def get_flair_id(self,flair):
+        return 0

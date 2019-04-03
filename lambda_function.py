@@ -1,6 +1,5 @@
 from Reddit import Reddit
 
-
 def lambda_handler(event, context):
     red = Reddit()
     return red.scan()

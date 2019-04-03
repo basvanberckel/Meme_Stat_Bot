@@ -1,45 +1,22 @@
-from joblib import load
-import numpy
-import copy
+from MemeData import MemeData
 
 
 class Stats:
     def __init__(self, reddit):
         self.reddit = reddit
-
-    clf = load('model.joblib')
-    bins = [0, 25, 100, 1000, 10000, 100000]
+        self.data = MemeData()
 
     def post_stats(self, meme):
-        prediction = self.predict(meme)[0].tolist()
-        score = 0
-        for index, col in enumerate(prediction):
-            idx = len(prediction)-1 - index
-            score += prediction[idx]
-            if score > 0.5 and idx > 0:
-                reply = "Beep Beep Boop  \nI'm {} sure this post will get at least {} upvotes".format(
-                    str(round(score * 100, 1)) + '%', self.bins[idx])
-                self.reddit.submission(meme['id']).reply(reply)
-                return prediction
-        return prediction
-
-    def extract_primitive_meme(self, row):
-        row.pop('flair', None)
-        row.pop('upvotes', None)
-        row.pop('time_stamp', None)
-        row.pop('ratio', None)
-        ftr = [3600, 60, 1]
-        row['time'] = sum([a * b for a, b in zip(ftr, map(int, row['time'].split(':')))]) / (60 * 60)
-        #row.pop('time', None)
-        row.pop('id', None)
-        row.pop('title', None)
-        return row
-
-    def predict(self, meme):
-        meme = self.extract_primitive_meme(copy.copy(meme))
-        row = []
-        for value in meme.values():
-            row.append(float(value))
-        row = numpy.array(row).reshape(1, -1)
-        prediction = self.clf.predict_proba(row)
-        return prediction
+        submission = self.reddit.submission(meme['id'])
+        similar = self.data.get_similar(meme)
+        size = len(similar['loss']) + len(similar['broke even'])
+        if size > 0:
+            reply = 'Found {} similar memes  \n {}% turned into a loss  \n {}% of them at least broke even  \n {}% made good profit'.format(
+                size,
+                round(len(similar['loss']) / size * 100, 1),
+                round(len(similar['broke even']) / size * 100, 1),
+                round(len(similar['big profit']) / size * 100, 1))
+            self.reddit.submission(submission.id).reply(
+                reply + '  \n[source code](https://github.com/Caribosaurus/MemeInvestor_ML)')
+        print('found {} posts at {} investements and {} updoots'.format(size, meme['investements'],
+                                                                        meme['updoots']))
