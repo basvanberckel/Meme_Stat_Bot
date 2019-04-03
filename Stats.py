@@ -17,6 +17,6 @@ class Stats:
                 round(len(similar['broke even']) / size * 100, 1),
                 round(len(similar['big profit']) / size * 100, 1))
             self.reddit.submission(submission.id).reply(
-                reply + '  \n[source code](https://github.com/Caribosaurus/MemeInvestor_ML)')
+                reply + '  \n[source code](https://github.com/Caribosaurus/Meme_Stat_Bot)')
         print('found {} posts at {} investements and {} updoots'.format(size, meme['investements'],
                                                                         meme['updoots']))
