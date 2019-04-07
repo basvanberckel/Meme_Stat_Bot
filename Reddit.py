@@ -1,6 +1,5 @@
 import praw
 import datetime
-import boto3
 import os
 from MemeData import MemeData
 from Stats import Stats
@@ -46,7 +45,7 @@ class Reddit:
                     'flair': str(submission.author_flair_text), 'upvotes': None}
 
             if self.collect_data and 3 <= time_delta < 4:
-                self.stats.post_stats(meme)
+                #self.stats.post_stats(meme)
                 self.data.add(meme)
             retour.append(meme)
 
