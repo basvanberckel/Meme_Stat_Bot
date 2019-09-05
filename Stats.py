@@ -11,12 +11,12 @@ class Stats:
         similar = self.data.get_similar(meme)
         size = len(similar['loss']) + len(similar['broke even'])
         if size > 0:
-            reply = 'Found {} similar submissions  \n {}% turned into a loss  \n {}% of them at least broke even  \n {}% made good profit'.format(
+            reply = 'Found {} similar submissions  \n\n {}% turned into a loss  \n\n {}% of them at least broke even  \n\n {}% made good profit'.format(
                 size,
                 round(len(similar['loss']) / size * 100, 1),
                 round(len(similar['broke even']) / size * 100, 1),
                 round(len(similar['big profit']) / size * 100, 1))
             self.reddit.submission(submission.id).reply(
-                reply + '  \n[source code](https://github.com/Caribosaurus/Meme_Stat_Bot)')
+                reply + '  \n\n[source code](https://github.com/Caribosaurus/Meme_Stat_Bot)')
         print('found {} posts at {} investements and {} updoots'.format(size, meme['investements'],
                                                                         meme['updoots']))
